@@ -17,15 +17,27 @@ if (arguments.infile == '[platform].annot') :
 infile = open(join(arguments.folder,arguments.infile),'r')
 outfile = open(join(arguments.folder,gpl_id+'-platform.txt'), 'w');
 
-#firstlinewords = infile.readline().strip('\n').split('\t')
-outfile.write('GPL_ID\tPROBE_ID\tGENE_SYMBOL\tGENE_ID\tORGANISM')
+# Don't write this header line, contrary to some manuals. Will result in this error:
+# 	"invalid input syntax for type numeric: "GENE_ID""
+# outfile.write('GPL_ID\tPROBE_ID\tGENE_SYMBOL\tGENE_ID\tORGANISM')
 
-firstlineremoved = 0
+inputheaderlineremoved = 0
+thisthefirstoutputline = 1
 
 for line in infile:
 	if line[:1] not in ['!','^','#']:
-		if firstlineremoved == 0:
-			firstlineremoved = 1
+		if inputheaderlineremoved == 0:
+			inputheaderlineremoved = 1
 		else:
 			words = line.strip('\n').split('\t')
-			outfile.write('\n'+gpl_id+'\t'+words[0]+'\t'+words[2].split('///')[0]+'\t'+words[3].split('///')[0]+'\t\"'+organism+'\"')
+
+			probe_id = words[0]
+			gene_symbol = words[2].split('///')[0]
+			gene_id = words[3].split('///')[0]
+
+			if thisthefirstoutputline:
+				thisthefirstoutputline = 0
+			else:
+				outfile.write('\n')
+
+			outfile.write(gpl_id+'\t'+probe_id+'\t'+gene_symbol+'\t'+gene_id+'\t\"'+organism+'\"')
