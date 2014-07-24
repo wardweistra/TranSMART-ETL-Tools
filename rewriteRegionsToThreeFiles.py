@@ -7,6 +7,7 @@ parser.add_argument('platform', default='platform', help='The name of the platfo
 parser.add_argument('study', default='study', help='The name of the study.')
 parser.add_argument('-folder', default='./', help='The folder for the in and output files.')
 parser.add_argument('-level', default='region', choices=['region', 'gene'], help='The aggregation level of the data.')
+parser.add_argument('-tissue', default='', help='The tissue from which the samples come.')
 arguments = parser.parse_args()
 
 infile = open(join(arguments.folder,arguments.infile),'r')
@@ -60,7 +61,7 @@ for subject in subjects:
 # Write subjectmappingfile
 subjectmappingfile.write('STUDY_ID\tSITE_ID\tSUBJECT_ID\tSAMPLE_ID\tPLATFORM\tTISSUETYPE\tATTR1\tATTR2\tCATEGORY_CD\tSOURCE_CD')
 for subject in subjects:
-	subjectmappingfile.write('\n'+arguments.study+'\t\t'+subject+'\t'+subject+'\t'+arguments.platform+'\tOvary\t\t\tBiomarker_Data+Chrom+PLATFORM+TISSUETYPE\tSTD')
+	subjectmappingfile.write('\n'+arguments.study+'\t\t'+subject+'\t'+subject+'\t'+arguments.platform+'\t'+arguments.tissue+'\t\t\tBiomarker_Data+Chrom+PLATFORM+TISSUETYPE\tSTD')
 	# Do we need another tab after this like in the gene expression?
 	# What is SITE_ID = 2?
 
@@ -80,7 +81,7 @@ for line in infile:
 		numprobes = words[4]
 		cytoband = ''
 		gene_symbol = ''
-		geni_id = ''
+		gene_id = ''
 		regionname = 'chr'+chromosome+':'+start+'-'+end
 	elif arguments.level == 'gene':
 		numprobes = ''
@@ -97,7 +98,7 @@ for line in infile:
 				columnnr = subjects[subject][column]
 				samplesfile.write('\t'+words[columnnr])
 			else:
-				samplesfile.write('\tNA')
+				samplesfile.write('\t0')
 
 	# for word in words[8:]:
 	# 	samplesfile.write('\t'+word)
