@@ -4,18 +4,20 @@ from os.path import join
 parser = argparse.ArgumentParser(description='Convert multiple RNAseq output files to the RNAseq platform, data file and subject sample mapping tranSMART expects.')
 parser.add_argument('-infiles', required=True, nargs='*', help='The files to be used as input.')
 parser.add_argument('-samples', required=True, nargs='*', help='The sample names to be used.')
-parser.add_argument('-subjects', nargs='*', help='The subject names to be used.')
+parser.add_argument('-subjects', nargs='*', help='The subject names to be used. If empty the sample names will be used.')
 parser.add_argument('-tissues', nargs='*', help='The tissue types to be used.')
+parser.add_argument('-readcountcolumn', nargs='*', help='The number of the column in each file that holds the readcounts. (starts at 0, will be 6 if empty)')
 parser.add_argument('-platform', default='platform', help='The name of the platform.')
 parser.add_argument('-study', default='study', help='The name of the study.')
 parser.add_argument('-organism', default='Homo Sapiens', help='The name of the organism.')
-parser.add_argument('-folder', default='./', help='The folder for the in and output files.')
+parser.add_argument('-folder', default='./', help='The folder for the in and output files. (Optional)')
 arguments = parser.parse_args()
 
 infiles  = arguments.infiles
 samples  = arguments.samples
 subjects = arguments.subjects
 tissues = arguments.tissues
+readcountcolumn = arguments.readcountcolumn
 platform = arguments.platform
 study    = arguments.study
 organism = arguments.organism
@@ -41,6 +43,13 @@ if tissues == None:
 elif len(tissues)!=len(samples):
 	print "Different number of arguments for tissues and samples"
 	exit()
+if readcountcolumn == None:
+	readcountcolumn = []
+	for sample in samples:
+		readcountcolumn.append('6')
+elif len(readcountcolumn)!=len(samples):
+	print "Different number of arguments for readcountcolumn and samples"
+	exit()
 
 samplescollection = {}
 for sample in samples:
@@ -63,7 +72,7 @@ for infile in infiles:
 	for line in infile:
 		words = line.strip('\n').split('\t')
 		geneid = words[0]
-		readcount = words[6]
+		readcount = words[int(readcountcolumn[argumentiterator])]
 		if argumentiterator == 0:
 			genes.append(geneid)
 		samplescollection[samples[argumentiterator]][geneid] = readcount
